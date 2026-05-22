@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -79,6 +80,8 @@ fun ModelPageAppBar(
   onSystemPromptChanged: (String) -> Unit = {},
   shouldShowHistoryButton: Boolean = false,
   onHistoryClicked: (Model) -> Unit = {},
+  shouldShowExportButton: Boolean = false,
+  onExportClicked: () -> Unit = {},
 ) {
   var showConfigDialog by remember { mutableStateOf(false) }
   val modelManagerUiState by modelManagerViewModel.uiState.collectAsState()
@@ -173,6 +176,22 @@ fun ModelPageAppBar(
             Icon(
               imageVector = Icons.Rounded.History,
               contentDescription = stringResource(R.string.cd_chat_history),
+              tint = MaterialTheme.colorScheme.onSurface,
+              modifier = Modifier.size(20.dp),
+            )
+          }
+        }
+        if (downloadSucceeded && shouldShowExportButton) {
+          val enableExportButton =
+            !isModelInitializing && !modelPreparing && !inProgress && isModelInitialized
+          IconButton(
+            onClick = onExportClicked,
+            enabled = enableExportButton,
+            modifier = Modifier.alpha(if (!enableExportButton) 0.5f else 1f),
+          ) {
+            Icon(
+              imageVector = Icons.Rounded.Share,
+              contentDescription = stringResource(R.string.export_chat),
               tint = MaterialTheme.colorScheme.onSurface,
               modifier = Modifier.size(20.dp),
             )

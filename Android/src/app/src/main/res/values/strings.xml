@@ -383,6 +383,18 @@
   <!-- Content descriptive text for the clear history warning dialog. -->
   <string name="clear_history_dialog_content" translatable="false">Are you sure you want to clear the history? This action cannot be undone.</string>
 
+  <!-- Strings for chat export feature -->
+  <!-- Button label for exporting chat conversations. -->
+  <string name="export_chat" translatable="false">Export</string>
+  <!-- Dialog message asking user to choose export format. -->
+  <string name="export_chat_message" translatable="false">Choose export format</string>
+  <!-- Button label for JSON export format. -->
+  <string name="export_format_json" translatable="false">Export as JSON</string>
+  <!-- Button label for Markdown export format. -->
+  <string name="export_format_markdown" translatable="false">Export as Markdown</string>
+  <!-- Button label for plain text export format. -->
+  <string name="export_format_text" translatable="false">Export as Text</string>
+
   <!-- The following entries are for accessibility -->
 
   <!-- Content description spoken when the "add" icon is focused. [CHAR_LIMIT=NONE] -->

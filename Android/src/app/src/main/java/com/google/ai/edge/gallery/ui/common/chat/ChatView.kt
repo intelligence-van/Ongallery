@@ -25,6 +25,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
@@ -46,6 +47,8 @@ import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -55,6 +58,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -178,6 +184,8 @@ fun ChatView(
   val scope = rememberCoroutineScope()
   var navigatingUp by remember { mutableStateOf(false) }
 
+  var showExportMenu by remember { mutableStateOf(false) }
+
   val handleNavigateUp = {
     navigatingUp = true
     navigateUp()
@@ -292,6 +300,12 @@ fun ChatView(
                 scope.launch { drawerState.close() }
               },
               onDismissed = { scope.launch { drawerState.close() } },
+              onExportSession = { session, format ->
+                scope.launch { drawerState.close() }
+                kotlinx.coroutines.withContext(Dispatchers.IO) {
+                  ChatExportManager.shareSession(context, session, format)
+                }
+              },
             )
           }
         }
@@ -310,6 +324,8 @@ fun ChatView(
               inProgress = uiState.inProgress,
               modelPreparing = uiState.preparing,
               shouldShowHistoryButton = true,
+              shouldShowExportButton = true,
+              onExportClicked = { showExportMenu = true },
               onConfigChanged = { old, new ->
                 // Filter out config values that are not relevant to the task.
                 //
@@ -416,6 +432,78 @@ fun ChatView(
                       task = task,
                       modelManagerViewModel = modelManagerViewModel,
                     )
+                }
+              }
+            }
+
+            // Export format selection dialog.
+            if (showExportMenu) {
+              AlertDialog(
+                onDismissRequest = { showExportMenu = false },
+                title = { Text(stringResource(R.string.export_chat)) },
+                text = { Text(stringResource(R.string.export_chat_message)) },
+                confirmButton = {},
+                dismissButton = {
+                  TextButton(onClick = { showExportMenu = false }) {
+                    Text(stringResource(R.string.cancel))
+                  }
+                },
+              ) {
+                Column {
+                  Button(
+                    onClick = {
+                      showExportMenu = false
+                      scope.launch {
+                        val sessionProto =
+                          ChatExportManager.buildCurrentSessionProto(
+                            sessionId = viewModel.currentSessionId,
+                            messages = currentMessages.toList(),
+                            modelName = selectedModel.name,
+                            taskId = task.id,
+                          )
+                        ChatExportManager.shareSession(context, sessionProto, ExportFormat.JSON)
+                      }
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                  ) {
+                    Text(stringResource(R.string.export_format_json))
+                  }
+                  Button(
+                    onClick = {
+                      showExportMenu = false
+                      scope.launch {
+                        val sessionProto =
+                          ChatExportManager.buildCurrentSessionProto(
+                            sessionId = viewModel.currentSessionId,
+                            messages = currentMessages.toList(),
+                            modelName = selectedModel.name,
+                            taskId = task.id,
+                          )
+                        ChatExportManager.shareSession(context, sessionProto, ExportFormat.MARKDOWN)
+                      }
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                  ) {
+                    Text(stringResource(R.string.export_format_markdown))
+                  }
+                  Button(
+                    onClick = {
+                      showExportMenu = false
+                      scope.launch {
+                        val sessionProto =
+                          ChatExportManager.buildCurrentSessionProto(
+                            sessionId = viewModel.currentSessionId,
+                            messages = currentMessages.toList(),
+                            modelName = selectedModel.name,
+                            taskId = task.id,
+                          )
+                        ChatExportManager.shareSession(context, sessionProto, ExportFormat.PLAIN_TEXT)
+                      }
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                  ) {
+                    Text(stringResource(R.string.export_format_text))
+                  }
                 }
               }
             }
