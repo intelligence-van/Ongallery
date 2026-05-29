@@ -302,9 +302,7 @@ fun ChatView(
               onDismissed = { scope.launch { drawerState.close() } },
               onExportSession = { session, format ->
                 scope.launch { drawerState.close() }
-                kotlinx.coroutines.withContext(Dispatchers.IO) {
-                  ChatExportManager.shareSession(context, session, format)
-                }
+                ChatExportManager.shareSession(context, session, format)
               },
             )
           }
@@ -441,71 +439,71 @@ fun ChatView(
               AlertDialog(
                 onDismissRequest = { showExportMenu = false },
                 title = { Text(stringResource(R.string.export_chat)) },
-                text = { Text(stringResource(R.string.export_chat_message)) },
+                text = {
+                  Column {
+                    Button(
+                      onClick = {
+                        showExportMenu = false
+                        scope.launch {
+                          val sessionProto =
+                            ChatExportManager.buildCurrentSessionProto(
+                              sessionId = viewModel.currentSessionId,
+                              messages = currentMessages.toList(),
+                              modelName = selectedModel.name,
+                              taskId = task.id,
+                            )
+                          ChatExportManager.shareSession(context, sessionProto, ExportFormat.JSON)
+                        }
+                      },
+                      modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    ) {
+                      Text(stringResource(R.string.export_format_json))
+                    }
+                    Button(
+                      onClick = {
+                        showExportMenu = false
+                        scope.launch {
+                          val sessionProto =
+                            ChatExportManager.buildCurrentSessionProto(
+                              sessionId = viewModel.currentSessionId,
+                              messages = currentMessages.toList(),
+                              modelName = selectedModel.name,
+                              taskId = task.id,
+                            )
+                          ChatExportManager.shareSession(context, sessionProto, ExportFormat.MARKDOWN)
+                        }
+                      },
+                      modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    ) {
+                      Text(stringResource(R.string.export_format_markdown))
+                    }
+                    Button(
+                      onClick = {
+                        showExportMenu = false
+                        scope.launch {
+                          val sessionProto =
+                            ChatExportManager.buildCurrentSessionProto(
+                              sessionId = viewModel.currentSessionId,
+                              messages = currentMessages.toList(),
+                              modelName = selectedModel.name,
+                              taskId = task.id,
+                            )
+                          ChatExportManager.shareSession(context, sessionProto, ExportFormat.PLAIN_TEXT)
+                        }
+                      },
+                      modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    ) {
+                      Text(stringResource(R.string.export_format_text))
+                    }
+                  }
+                },
                 confirmButton = {},
                 dismissButton = {
                   TextButton(onClick = { showExportMenu = false }) {
                     Text(stringResource(R.string.cancel))
                   }
                 },
-              ) {
-                Column {
-                  Button(
-                    onClick = {
-                      showExportMenu = false
-                      scope.launch {
-                        val sessionProto =
-                          ChatExportManager.buildCurrentSessionProto(
-                            sessionId = viewModel.currentSessionId,
-                            messages = currentMessages.toList(),
-                            modelName = selectedModel.name,
-                            taskId = task.id,
-                          )
-                        ChatExportManager.shareSession(context, sessionProto, ExportFormat.JSON)
-                      }
-                    },
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                  ) {
-                    Text(stringResource(R.string.export_format_json))
-                  }
-                  Button(
-                    onClick = {
-                      showExportMenu = false
-                      scope.launch {
-                        val sessionProto =
-                          ChatExportManager.buildCurrentSessionProto(
-                            sessionId = viewModel.currentSessionId,
-                            messages = currentMessages.toList(),
-                            modelName = selectedModel.name,
-                            taskId = task.id,
-                          )
-                        ChatExportManager.shareSession(context, sessionProto, ExportFormat.MARKDOWN)
-                      }
-                    },
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                  ) {
-                    Text(stringResource(R.string.export_format_markdown))
-                  }
-                  Button(
-                    onClick = {
-                      showExportMenu = false
-                      scope.launch {
-                        val sessionProto =
-                          ChatExportManager.buildCurrentSessionProto(
-                            sessionId = viewModel.currentSessionId,
-                            messages = currentMessages.toList(),
-                            modelName = selectedModel.name,
-                            taskId = task.id,
-                          )
-                        ChatExportManager.shareSession(context, sessionProto, ExportFormat.PLAIN_TEXT)
-                      }
-                    },
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                  ) {
-                    Text(stringResource(R.string.export_format_text))
-                  }
-                }
-              }
+              )
             }
 
             // Image viewer.
